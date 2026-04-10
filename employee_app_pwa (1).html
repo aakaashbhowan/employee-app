@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>MyWork</title>
+
+<!-- PWA / iOS Home Screen -->
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="MyWork"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#0D1B2E"/>
+
+<!-- App icon (inline SVG rendered as data URI so no external file needed) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230D1B2E'/%3E%3Crect x='20' y='20' width='55' height='55' rx='10' fill='%2300C5A0'/%3E%3Crect x='85' y='20' width='55' height='55' rx='10' fill='%231B8AFF' opacity='.7'/%3E%3Crect x='20' y='85' width='55' height='55' rx='10' fill='%231B8AFF' opacity='.7'/%3E%3Crect x='85' y='85' width='55' height='55' rx='10' fill='%2300C5A0' opacity='.5'/%3E%3C/svg%3E"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#0D1B2E;margin:0;padding:0;display:flex;justify-content:center;align-items:stretch;height:100vh;overflow:hidden;}
+.wrap{padding:0;width:100%;max-width:430px;height:100vh;margin:0 auto;}
+.wrap{display:flex;justify-content:center;padding:20px 0;}
+.phone{width:100%;height:100vh;background:#0D1B2E;border-radius:0;overflow:hidden;border:none;box-shadow:none;position:relative;font-family:'Plus Jakarta Sans',sans-serif;color:#E2EAF4;}
+.island{display:none;}
+.statusbar{display:none;}
+.statusbar .time{font-size:13px;font-weight:600;color:#E2EAF4;}
+.statusbar .icons{display:flex;gap:5px;align-items:center;}
+.statusbar .icons svg{width:13px;height:13px;stroke:#E2EAF4;fill:none;stroke-width:2;}
+.screens{position:relative;width:100%;height:100vh;}
+.screen{position:absolute;top:0;left:0;width:100%;height:100vh;overflow:hidden;display:none;flex-direction:column;background:#0D1B2E;}
+.screen-scroll{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column;}
+.screen-scroll::-webkit-scrollbar{display:none;}
+.screen::-webkit-scrollbar{display:none;}
+.screen.active{display:flex;}
+.topbar{padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.back-btn{width:32px;height:32px;background:#162540;border:1px solid #1E3A5A;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.back-btn svg{width:14px;height:14px;stroke:#A0BCCC;fill:none;stroke-width:2;}
+.screen-title{font-size:16px;font-weight:600;color:#E2EAF4;}
+.avatar{width:36px;height:36px;background:#1B4D8A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#7FC4F8;}
+.slabel{font-size:10.5px;color:#5A7A99;text-transform:uppercase;letter-spacing:.08em;font-weight:600;padding:0 20px;margin-bottom:8px;flex-shrink:0;}
+.search-bar{margin:0 20px 14px;background:#162540;border:1px solid #1E3A5A;border-radius:12px;display:flex;align-items:center;padding:0 14px;height:42px;gap:10px;flex-shrink:0;cursor:pointer;}
+.search-bar svg{width:14px;height:14px;stroke:#5A7A99;fill:none;stroke-width:2;flex-shrink:0;}
+.search-bar span{font-size:13px;color:#5A7A99;}
+.bnav{height:72px;background:#0A1626;border-top:1px solid #1E3050;display:flex;justify-content:space-around;align-items:flex-start;padding-top:10px;flex-shrink:0;}
+.nav-i{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0 8px;}
+.nav-i svg{width:22px;height:22px;stroke:#5A7A99;fill:none;stroke-width:1.6;}
+.nav-i span{font-size:9px;color:#5A7A99;font-weight:500;}
+.nav-i.on svg{stroke:#00C5A0;}
+.nav-i.on span{color:#00C5A0;}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:#00C5A0;margin:0 auto;}
+.card{background:#162540;border:1px solid #1E3A5A;border-radius:14px;overflow:hidden;flex-shrink:0;}
+.card-head{padding:10px 14px;border-bottom:1px solid #1A2F4A;display:flex;align-items:center;justify-content:space-between;}
+.card-head h3{font-size:11px;font-weight:600;color:#5A7A99;text-transform:uppercase;letter-spacing:.07em;}
+.card-head a{font-size:11px;color:#00C5A0;cursor:pointer;}
+.hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;margin-bottom:14px;flex-shrink:0;}
+.tile{background:#162540;border:1px solid #1E3A5A;border-radius:14px;padding:14px 12px 12px;display:flex;flex-direction:column;gap:7px;cursor:pointer;transition:border-color .15s,background .15s;}
+.tile:active{background:#1E3050;border-color:#00C5A0;}
+.tile-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tile-ico svg{width:18px;height:18px;}
+.ic-t{background:#003D32;stroke:#00C5A0;}
+.ic-b{background:#0A2D52;stroke:#7FC4F8;}
+.ic-a{background:#3D2A00;stroke:#F5B942;}
+.ic-c{background:#3D1A10;stroke:#FF7A5A;}
+.ic-p{background:#2A1550;stroke:#B07EF8;}
+.ic-k{background:#3D0A25;stroke:#F87EBB;}
+.tile-name{font-size:12.5px;font-weight:600;color:#D8EAF4;}
+.tile-desc{font-size:10px;color:#5A7A99;line-height:1.4;}
+.badge{display:inline-block;font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:20px;}
+.bdg-t{background:#003D32;color:#00C5A0;}
+.bdg-a{background:#3D2A00;color:#F5B942;}
+.chip-row{display:flex;gap:8px;padding:0 20px 2px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;flex-shrink:0;}
+.chip-row::-webkit-scrollbar{display:none;}
+.chip{background:#162540;border:1px solid #1E3A5A;border-radius:20px;padding:7px 13px;white-space:nowrap;font-size:11px;font-weight:600;color:#A0BCCC;display:flex;align-items:center;gap:6px;flex-shrink:0;cursor:pointer;}
+.chip svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;}
+.chip.hi{background:#003D32;border-color:#00C5A0;color:#00C5A0;}
+.row{padding:12px 14px;border-bottom:1px solid #1A2F4A;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.row:last-child{border-bottom:none;}
+.row:active{background:#1E3050;}
+.row-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.row-info{flex:1;}
+.row-info p{font-size:13px;font-weight:600;color:#D8EAF4;margin:0;}
+.row-info span{font-size:11px;color:#5A7A99;}
+.row-arr{stroke:#3A5A75;fill:none;stroke-width:2;width:14px;height:14px;flex-shrink:0;}
+.row-badge{background:#1B3D5A;color:#7FC4F8;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;}
+.person-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.ev-date{width:34px;text-align:center;flex-shrink:0;}
+.ev-date .d{font-size:17px;font-weight:700;color:#E2EAF4;line-height:1;}
+.ev-date .m{font-size:9px;color:#5A7A99;text-transform:uppercase;}
+.ev-dot{width:7px;height:7px;border-radius:50%;margin-left:auto;flex-shrink:0;}
+.msg{display:flex;gap:9px;padding:10px 14px;border-bottom:1px solid #1A2F4A;}
+.msg:last-child{border-bottom:none;}
+.msg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;}
+.msg-body{flex:1;}
+.msg-name{font-size:11.5px;font-weight:600;color:#A0BCCC;}
+.msg-text{font-size:11px;color:#5A7A99;margin-top:2px;line-height:1.45;}
+.msg-time{font-size:10px;color:#3A5A75;margin-top:3px;}
+.floor-svg-wrap{margin:0 20px 14px;background:#162540;border:1px solid #1E3A5A;border-radius:14px;overflow:hidden;flex-shrink:0;}
+.form-group{margin:0 20px 14px;flex-shrink:0;}
+.form-label{font-size:11px;color:#5A7A99;font-weight:600;margin-bottom:6px;display:block;}
+.form-input{width:100%;background:#162540;border:1px solid #1E3A5A;border-radius:10px;padding:10px 14px;font-size:13px;color:#E2EAF4;font-family:'Plus Jakarta Sans',sans-serif;outline:none;}
+.form-input:focus{border-color:#00C5A0;}
+.form-select{width:100%;background:#162540;border:1px solid #1E3A5A;border-radius:10px;padding:10px 14px;font-size:13px;color:#E2EAF4;font-family:'Plus Jakarta Sans',sans-serif;outline:none;appearance:none;}
+.btn-primary{width:calc(100% - 40px);margin:0 20px 14px;background:#00C5A0;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:600;color:#003D32;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;flex-shrink:0;}
+.btn-primary:active{opacity:.85;}
+.btn-secondary{width:calc(100% - 40px);margin:0 20px 14px;background:#162540;border:1px solid #1E3A5A;border-radius:12px;padding:13px;font-size:13px;font-weight:600;color:#A0BCCC;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;flex-shrink:0;}
+.toast{position:absolute;bottom:82px;left:50%;transform:translateX(-50%);background:#00C5A0;color:#003D32;font-size:12px;font-weight:600;padding:10px 20px;border-radius:20px;white-space:nowrap;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
+.toast.show{opacity:1;}
+.stat-row{display:flex;gap:10px;padding:0 20px;margin-bottom:14px;flex-shrink:0;}
+.stat{flex:1;background:#162540;border:1px solid #1E3A5A;border-radius:12px;padding:12px;text-align:center;}
+.stat-val{font-size:20px;font-weight:700;color:#00C5A0;}
+.stat-lbl{font-size:10px;color:#5A7A99;margin-top:2px;}
+.detail-hero{background:linear-gradient(135deg,#003D32,#0A2D52);margin:0 20px 14px;border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.detail-hero-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);}
+.detail-hero-title{font-size:17px;font-weight:700;color:#E2EAF4;}
+.detail-hero-sub{font-size:11px;color:#A0C8B8;margin-top:2px;}
+.spacer{height:16px;flex-shrink:0;}
+
+/* ── Copilot Agent ── */
+.agent-tab{position:absolute;right:-1px;top:50%;width:24px;background:linear-gradient(180deg,#00C5A0,#1B8AFF);border-radius:8px 0 0 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 4px;cursor:grab;z-index:150;box-shadow:-2px 0 10px rgba(0,197,160,.35);transition:box-shadow .2s;touch-action:none;user-select:none;}
+.agent-tab:active{cursor:grabbing;}
+.agent-tab-arrow{width:10px;height:10px;stroke:white;fill:none;stroke-width:2.5;flex-shrink:0;}
+.agent-tab-label{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);font-size:8px;font-weight:700;color:white;letter-spacing:.07em;white-space:nowrap;}
+.agent-tab-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.7);}
+
+.agent-panel{position:absolute;top:0;right:0;width:100%;height:100%;background:#0A1626;z-index:160;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.agent-panel.open{transform:translateX(0);}
+.agent-header{padding:14px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1E3050;flex-shrink:0;}
+.agent-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00C5A0,#1B8AFF);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.agent-avatar svg{width:20px;height:20px;}
+.agent-title{flex:1;}
+.agent-title p{font-size:14px;font-weight:700;color:#E2EAF4;margin:0;}
+.agent-title span{font-size:10.5px;color:#00C5A0;}
+.agent-close{width:30px;height:30px;background:#162540;border:1px solid #1E3A5A;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.agent-close svg{width:14px;height:14px;stroke:#A0BCCC;fill:none;stroke-width:2;}
+
+.agent-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;scrollbar-width:none;}
+.agent-messages::-webkit-scrollbar{display:none;}
+.agent-msg{display:flex;gap:8px;align-items:flex-end;}
+.agent-msg.user{flex-direction:row-reverse;}
+.agent-msg-av{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+.agent-bubble{max-width:78%;padding:10px 13px;border-radius:16px;font-size:12.5px;line-height:1.5;}
+.agent-msg.bot .agent-bubble{background:#162540;border:1px solid #1E3A5A;color:#D8EAF4;border-bottom-left-radius:4px;}
+.agent-msg.user .agent-bubble{background:linear-gradient(135deg,#00C5A0,#009E80);color:#003D32;font-weight:600;border-bottom-right-radius:4px;}
+.agent-bubble .action-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.action-chip{background:#1E3A5A;border:1px solid #2A4A6A;color:#7FC4F8;font-size:10.5px;padding:4px 10px;border-radius:20px;cursor:pointer;font-weight:600;}
+.action-chip:active{background:#2A4A6A;}
+.agent-typing{display:flex;gap:4px;align-items:center;padding:10px 13px;background:#162540;border:1px solid #1E3A5A;border-radius:16px;border-bottom-left-radius:4px;width:52px;}
+.agent-typing span{width:6px;height:6px;background:#5A7A99;border-radius:50%;animation:typing .9s infinite;}
+.agent-typing span:nth-child(2){animation-delay:.15s;}
+.agent-typing span:nth-child(3){animation-delay:.3s;}
+@keyframes typing{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+
+.agent-input-row{padding:10px 14px 18px;border-top:1px solid #1E3050;display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.agent-input{flex:1;background:#162540;border:1px solid #1E3A5A;border-radius:22px;padding:10px 16px;font-size:13px;color:#E2EAF4;font-family:'Plus Jakarta Sans',sans-serif;outline:none;}
+.agent-input:focus{border-color:#00C5A0;}
+.agent-send{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#00C5A0,#1B8AFF);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.agent-send svg{width:16px;height:16px;}
+.agent-suggestions{display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.agent-suggestions::-webkit-scrollbar{display:none;}
+.sug-chip{background:#162540;border:1px solid #1E3A5A;color:#A0BCCC;font-size:11px;padding:6px 12px;border-radius:20px;white-space:nowrap;cursor:pointer;font-weight:600;flex-shrink:0;}
+.sug-chip:active{background:#1E3050;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="phone">
+  <div class="island"></div>
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <div class="icons">
+      <svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="11" rx="2" fill="#E2EAF4" stroke="none"/><path d="M22 11v3" stroke-width="2.5"/></svg>
+    </div>
+  </div>
+  <div class="screens">
+
+    <!-- HOME -->
+    <div class="screen active" id="s-home">
+<div class="screen-scroll">
+
+      <div class="topbar">
+        <div><div style="font-size:19px;font-weight:700;color:#E2EAF4;">Hello, <span style="color:#00C5A0;">Aakaash</span> 👋</div><div style="font-size:11px;color:#5A7A99;margin-top:2px;">Thursday, 9 April · Sandton HQ</div></div>
+        <div class="avatar">AK</div>
+      </div>
+      <div class="search-bar" onclick="go('s-search')">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span>Ask me anything…</span>
+      </div>
+      <div class="slabel">Quick actions</div>
+      <div class="chip-row">
+        <div class="chip hi" onclick="go('s-book')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Book weekly</div>
+        <div class="chip" onclick="window.open('microsoft-edge-https://discovery.service-now.com/esc','_blank')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Log ticket</div>
+        <div class="chip" onclick="go('s-calendar')"><svg viewBox="0 0 24 24"><path d="M2 4h20v16H2z"/><path d="M2 9h20M8 2v4M16 2v4"/></svg>Meetings</div>
+        <div class="chip" onclick="go('s-appt')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Make appt.</div>
+        <div class="chip" onclick="window.open('microsoft-edge-https://discovery.service-now.com/esc','_blank')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>View ticket</div>
+      </div>
+      <div class="slabel">My hub</div>
+      <div class="hub-grid">
+        <div class="tile" onclick="go('s-people')"><div class="tile-ico ic-t"><svg class="ic-t" viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><div class="tile-name">Find people</div><div class="tile-desc">Directory & org chart</div><span class="badge bdg-t">247 online</span></div>
+        <div class="tile" onclick="go('s-calendar')"><div class="tile-ico ic-b"><svg class="ic-b" viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div class="tile-name">My calendar</div><div class="tile-desc">Rooms & appointments</div><span class="badge bdg-a">3 today</span></div>
+        <div class="tile" onclick="go('s-book')"><div class="tile-ico ic-a"><svg class="ic-a" viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><div class="tile-name">Find & book</div><div class="tile-desc">Desks, rooms & parking</div></div>
+        <div class="tile" onclick="window.open('microsoft-edge-https://performancemanager.successfactors.eu/sf/timeoff?_s.crb=iJ9wht3l9AhkDNnHIO8UAC0hCST%2b0lwFhXmFIDMFL0A%3d','_blank')"><div class="tile-ico ic-c"><svg class="ic-c" viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div class="tile-name">Leave</div><div class="tile-desc">Submit &amp; track time off</div><div style="font-size:9px;color:#5A7A99;margin-top:2px;">&#128279; Opens SAP SuccessFactors</div></div>
+        <div class="tile" onclick="go('s-loans')"><div class="tile-ico ic-p"><svg class="ic-p" viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="tile-name">Find loans</div><div class="tile-desc">Staff benefits & HR</div></div>
+        <div class="tile" onclick="window.open('microsoft-edge-https://discovery.service-now.com/esc','_blank')"><div class="tile-ico ic-k"><svg class="ic-k" viewBox="0 0 24 24" fill="none" stroke-width="1.6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="tile-name">IT services</div><div class="tile-desc">Tickets &amp; requests</div><span class="badge bdg-a">2 open</span><div style="font-size:9px;color:#5A7A99;margin-top:2px;">&#128279; Opens ServiceNow</div></div>
+      </div>
+      <div style="margin:0 20px 14px;background:#162540;border:1px solid #1E3A5A;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;flex-shrink:0;" onclick="go('s-floor')">
+        <div style="width:36px;height:36px;background:#0A2D52;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FC4F8" stroke-width="1.6"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#D8EAF4;">Office floor plan</div><div style="font-size:10.5px;color:#5A7A99;">Level 4 · Block B · 14 desks free</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A5A75" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="slabel">Upcoming events</div>
+      <div class="card" style="margin:0 20px 14px;">
+        <div class="row" onclick="go('s-events')"><div class="ev-date"><div class="d">11</div><div class="m">Apr</div></div><div class="row-info"><p>Town Hall Q2</p><span>10:00 AM — Auditorium</span></div><div class="ev-dot" style="background:#00C5A0;"></div></div>
+        <div class="row" onclick="go('s-events')"><div class="ev-date"><div class="d">14</div><div class="m">Apr</div></div><div class="row-info"><p>New joiner onboarding</p><span>09:00 AM — Room 4B</span></div><div class="ev-dot" style="background:#7FC4F8;"></div></div>
+        <div class="row" onclick="go('s-events')"><div class="ev-date"><div class="d">17</div><div class="m">Apr</div></div><div class="row-info"><p>Safety & wellbeing day</p><span>All day — Multiple venues</span></div><div class="ev-dot" style="background:#F5B942;"></div></div>
+      </div>
+      <div class="slabel">Notice board</div>
+      <div class="card" style="margin:0 20px 14px;">
+        <div class="msg"><div class="msg-av" style="background:#1B4D8A;color:#7FC4F8;">HR</div><div class="msg-body"><div class="msg-name">HR Team</div><div class="msg-text">Performance review cycle opens Monday 14 Apr. Complete self-assessment by month end.</div><div class="msg-time">2 hrs ago</div></div></div>
+        <div class="msg"><div class="msg-av" style="background:#003D32;color:#00C5A0;">FM</div><div class="msg-body"><div class="msg-name">Facilities</div><div class="msg-text">Gym on Level 2 closed Thu–Fri. Access via Level 1 stairs.</div><div class="msg-time">Yesterday</div></div></div>
+      </div>
+      <div class="slabel">Food court today</div>
+      <div class="card" style="margin:0 20px 14px;">
+        <div class="row"><div class="row-ico">🍲</div><div class="row-info"><p>Bunny chow special</p><span>Level 1 — Food Wang</span></div><div style="font-size:13px;font-weight:600;color:#00C5A0;">R65</div></div>
+        <div class="row"><div class="row-ico">🥗</div><div class="row-info"><p>Build-your-own salad</p><span>Level 1 — Freshly</span></div><div style="font-size:13px;font-weight:600;color:#00C5A0;">R55</div></div>
+        <div class="row"><div class="row-ico">☕</div><div class="row-info"><p>Barista coffee bar</p><span>Level G — The Grind</span></div><div style="font-size:13px;font-weight:600;color:#00C5A0;">R38</div></div>
+      </div>
+      <div class="spacer"></div>
+      </div>
+<div class="bnav">
+        <div class="nav-i on" onclick="navTo('s-home')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Home</span><div class="nav-dot"></div></div>
+        <div class="nav-i" onclick="navTo('s-calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Calendar</span></div>
+        <div class="nav-i" onclick="navTo('s-channels')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Channels</span></div>
+        <div class="nav-i" onclick="navTo('s-profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="screen" id="s-search">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Ask me anything</div><div style="width:32px;"></div></div>
+      <div style="margin:0 20px 14px;flex-shrink:0;"><input class="form-input" placeholder="Search people, rooms, info…" style="font-size:14px;padding:12px 14px;"/></div>
+      <div class="slabel">Suggested</div>
+      <div class="card" style="margin:0 20px;">
+        <div class="row" onclick="go('s-people')"><div class="row-ico" style="background:#003D32;border-radius:9px;">👤</div><div class="row-info"><p>Find a colleague</p><span>Search the directory</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div class="row" onclick="go('s-book')"><div class="row-ico" style="background:#3D2A00;border-radius:9px;">🏢</div><div class="row-info"><p>Book a room</p><span>Check availability</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div class="row" onclick="go('s-floor')"><div class="row-ico" style="background:#0A2D52;border-radius:9px;">🗺️</div><div class="row-info"><p>Floor plan</p><span>Sandton HQ Level 4</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div class="row" onclick="window.open('microsoft-edge-https://performancemanager.successfactors.eu/sf/timeoff?_s.crb=iJ9wht3l9AhkDNnHIO8UAC0hCST%2b0lwFhXmFIDMFL0A%3d','_blank')"><div class="row-ico" style="background:#3D1A10;border-radius:9px;">🏖️</div><div class="row-info"><p>Apply for leave</p><span>12 days remaining</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+    </div>
+
+    <!-- PEOPLE -->
+    <div class="screen" id="s-people">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Find people</div><div class="avatar">AK</div></div>
+      <div class="search-bar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><span>Search by name or department…</span></div>
+      <div class="slabel">Online now</div>
+      <div class="card" style="margin:0 20px;">
+        <div class="row" onclick="go('s-person')"><div class="person-av" style="background:#1B4D8A;color:#7FC4F8;">SN</div><div class="row-info"><p>Sarah Nkosi</p><span>Head of HR · Level 5</span></div><div style="width:8px;height:8px;border-radius:50%;background:#00C5A0;flex-shrink:0;"></div></div>
+        <div class="row" onclick="go('s-person')"><div class="person-av" style="background:#003D32;color:#00C5A0;">DM</div><div class="row-info"><p>David Mthembu</p><span>IT Manager · Level 3</span></div><div style="width:8px;height:8px;border-radius:50%;background:#00C5A0;flex-shrink:0;"></div></div>
+        <div class="row" onclick="go('s-person')"><div class="person-av" style="background:#3D2A00;color:#F5B942;">LP</div><div class="row-info"><p>Lerato Phiri</p><span>Finance Analyst · Level 6</span></div><div style="width:8px;height:8px;border-radius:50%;background:#00C5A0;flex-shrink:0;"></div></div>
+        <div class="row" onclick="go('s-person')"><div class="person-av" style="background:#2A1550;color:#B07EF8;">JV</div><div class="row-info"><p>Jacques van Wyk</p><span>Dev Lead · Level 4</span></div><div style="width:8px;height:8px;border-radius:50%;background:#F5B942;flex-shrink:0;"></div></div>
+        <div class="row" onclick="go('s-person')"><div class="person-av" style="background:#3D0A25;color:#F87EBB;">AM</div><div class="row-info"><p>Ayesha Moosa</p><span>UX Designer · Level 4</span></div><div style="width:8px;height:8px;border-radius:50%;background:#3A5A75;flex-shrink:0;"></div></div>
+      </div>
+    </div>
+
+    <!-- PERSON DETAIL -->
+    <div class="screen" id="s-person">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Profile</div><div style="width:32px;"></div></div>
+      <div style="margin:0 20px 14px;background:#162540;border:1px solid #1E3A5A;border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#1B4D8A;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#7FC4F8;">SN</div>
+        <div style="font-size:17px;font-weight:700;color:#E2EAF4;">Sarah Nkosi</div>
+        <div style="font-size:12px;color:#5A7A99;">Head of HR · Level 5, Block A</div>
+        <div style="display:flex;gap:10px;margin-top:6px;">
+          <div style="background:#003D32;border:1px solid #00C5A0;color:#00C5A0;font-size:11.5px;font-weight:600;padding:7px 16px;border-radius:20px;cursor:pointer;" onclick="toast('Message sent!')">Message</div>
+          <div style="background:#0A2D52;border:1px solid #1E5A8A;color:#7FC4F8;font-size:11.5px;font-weight:600;padding:7px 16px;border-radius:20px;cursor:pointer;" onclick="go('s-appt')">Book meeting</div>
+        </div>
+      </div>
+      <div class="card" style="margin:0 20px 14px;">
+        <div class="row"><div style="font-size:12px;color:#5A7A99;width:80px;flex-shrink:0;">Email</div><div style="font-size:12px;color:#7FC4F8;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c0b3eeaeabafb3a980a3afadb0a1aeb9eea3afeebaa1">[email&#160;protected]</a></div></div>
+        <div class="row"><div style="font-size:12px;color:#5A7A99;width:80px;flex-shrink:0;">Phone</div><div style="font-size:12px;color:#D8EAF4;">+27 11 555 0142</div></div>
+        <div class="row"><div style="font-size:12px;color:#5A7A99;width:80px;flex-shrink:0;">Department</div><div style="font-size:12px;color:#D8EAF4;">Human Resources</div></div>
+        <div class="row"><div style="font-size:12px;color:#5A7A99;width:80px;flex-shrink:0;">Reports to</div><div style="font-size:12px;color:#D8EAF4;">CEO Office</div></div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="screen" id="s-calendar">
+<div class="screen-scroll">
+
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">My calendar</div><div style="width:32px;"></div></div>
+      <div style="margin:0 20px 14px;display:flex;justify-content:space-between;flex-shrink:0;">
+        <div style="font-size:14px;font-weight:600;color:#E2EAF4;">April 2025</div>
+        <div style="padding:4px 10px;background:#003D32;border:1px solid #00C5A0;border-radius:20px;font-size:11px;color:#00C5A0;font-weight:600;cursor:pointer;">Today</div>
+      </div>
+      <div style="margin:0 20px 14px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;flex-shrink:0;">
+        <div style="text-align:center;font-size:10px;color:#5A7A99;padding:4px;">Mo</div><div style="text-align:center;font-size:10px;color:#5A7A99;padding:4px;">Tu</div><div style="text-align:center;font-size:10px;color:#5A7A99;padding:4px;">We</div><div style="text-align:center;font-size:10px;color:#5A7A99;padding:4px;">Th</div><div style="text-align:center;font-size:10px;color:#5A7A99;padding:4px;">Fr</div><div style="text-align:center;font-size:10px;color:#5A7A99;padding:4px;">Sa</div><div style="text-align:center;font-size:10px;color:#5A7A99;padding:4px;">Su</div>
+        <div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">1</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">2</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">3</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#E2EAF4;background:#00C5A0;border-radius:50%;font-weight:700;">4</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">5</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">6</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">7</div>
+        <div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">8</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">9</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">10</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#F5B942;font-weight:600;border-bottom:2px solid #F5B942;">11</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">12</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">13</div><div style="text-align:center;padding:6px 0;font-size:12px;color:#5A7A99;">14</div>
+      </div>
+      <div class="slabel">Today's schedule</div>
+      <div class="card" style="margin:0 20px;">
+        <div class="row"><div style="width:48px;text-align:center;flex-shrink:0;"><div style="font-size:11px;font-weight:600;color:#00C5A0;">09:00</div><div style="font-size:9px;color:#5A7A99;">1h</div></div><div style="width:3px;background:#00C5A0;border-radius:2px;height:36px;flex-shrink:0;"></div><div class="row-info" style="padding-left:8px;"><p>Stand-up sync</p><span>Teams · Room 4B</span></div></div>
+        <div class="row"><div style="width:48px;text-align:center;flex-shrink:0;"><div style="font-size:11px;font-weight:600;color:#7FC4F8;">11:00</div><div style="font-size:9px;color:#5A7A99;">30m</div></div><div style="width:3px;background:#7FC4F8;border-radius:2px;height:36px;flex-shrink:0;"></div><div class="row-info" style="padding-left:8px;"><p>1:1 with Jacques</p><span>In-person · His office</span></div></div>
+        <div class="row"><div style="width:48px;text-align:center;flex-shrink:0;"><div style="font-size:11px;font-weight:600;color:#F5B942;">14:00</div><div style="font-size:9px;color:#5A7A99;">2h</div></div><div style="width:3px;background:#F5B942;border-radius:2px;height:36px;flex-shrink:0;"></div><div class="row-info" style="padding-left:8px;"><p>Sprint planning</p><span>Studio A · Floor 4</span></div></div>
+      </div>
+      <div class="spacer"></div>
+      </div>
+<div class="bnav">
+        <div class="nav-i" onclick="navTo('s-home')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Home</span></div>
+        <div class="nav-i on" onclick="navTo('s-calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Calendar</span><div class="nav-dot"></div></div>
+        <div class="nav-i" onclick="navTo('s-channels')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Channels</span></div>
+        <div class="nav-i" onclick="navTo('s-profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div>
+      </div>
+    </div>
+
+    <!-- CHANNELS -->
+    <div class="screen" id="s-channels">
+<div class="screen-scroll">
+
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Viva Engage</div><div style="width:32px;"></div></div>
+      <div class="slabel">Your channels</div>
+      <div class="card" style="margin:0 20px;">
+        <div class="row" onclick="toast('Opening Company-wide channel…')"><div class="row-ico" style="background:#003D32;border-radius:9px;">🏢</div><div class="row-info"><p>Company-wide</p><span>5 new posts</span></div><span class="row-badge">5</span></div>
+        <div class="row" onclick="toast('Opening Tech channel…')"><div class="row-ico" style="background:#0A2D52;border-radius:9px;">💻</div><div class="row-info"><p>Tech & Innovation</p><span>12 new posts</span></div><span class="row-badge">12</span></div>
+        <div class="row" onclick="toast('Opening Social channel…')"><div class="row-ico" style="background:#2A1550;border-radius:9px;">🎉</div><div class="row-info"><p>Social & Wellbeing</p><span>No new posts</span></div></div>
+        <div class="row" onclick="toast('Opening Leadership channel…')"><div class="row-ico" style="background:#3D2A00;border-radius:9px;">📣</div><div class="row-info"><p>Leadership updates</p><span>3 new posts</span></div><span class="row-badge">3</span></div>
+      </div>
+      <div class="spacer"></div>
+      </div>
+<div class="bnav">
+        <div class="nav-i" onclick="navTo('s-home')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Home</span></div>
+        <div class="nav-i" onclick="navTo('s-calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Calendar</span></div>
+        <div class="nav-i on" onclick="navTo('s-channels')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Channels</span><div class="nav-dot"></div></div>
+        <div class="nav-i" onclick="navTo('s-profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="screen" id="s-profile">
+<div class="screen-scroll">
+
+      <div class="topbar"><div style="width:32px;"></div><div class="screen-title">My profile</div><div style="font-size:11.5px;color:#00C5A0;cursor:pointer;" onclick="toast('Settings opened')">Settings</div></div>
+      <div style="margin:0 20px 14px;background:#162540;border:1px solid #1E3A5A;border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#1B4D8A;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#7FC4F8;">AK</div>
+        <div style="font-size:17px;font-weight:700;color:#E2EAF4;">Aakaash Kumar</div>
+        <div style="font-size:12px;color:#5A7A99;">Product Manager · Level 4, Block B</div>
+        <div style="font-size:11px;background:#003D32;color:#00C5A0;padding:3px 12px;border-radius:20px;font-weight:600;margin-top:4px;">Active</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-val">12</div><div class="stat-lbl">Leave days left</div></div>
+        <div class="stat"><div class="stat-val">3</div><div class="stat-lbl">Open tickets</div></div>
+        <div class="stat"><div class="stat-val">8</div><div class="stat-lbl">Meetings this week</div></div>
+      </div>
+      <div class="card" style="margin:0 20px 14px;">
+        <div class="row" onclick="window.open('microsoft-edge-https://performancemanager.successfactors.eu/sf/timeoff?_s.crb=iJ9wht3l9AhkDNnHIO8UAC0hCST%2b0lwFhXmFIDMFL0A%3d','_blank')"><div class="row-ico" style="background:#3D1A10;border-radius:9px;">🏖️</div><div class="row-info"><p>My leave</p><span>12 days remaining</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div class="row" onclick="window.open('microsoft-edge-https://discovery.service-now.com/esc','_blank')"><div class="row-ico" style="background:#3D0A25;border-radius:9px;">🎫</div><div class="row-info"><p>My tickets</p><span>2 open · 1 resolved</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div class="row" onclick="go('s-loans')"><div class="row-ico" style="background:#2A1550;border-radius:9px;">💳</div><div class="row-info"><p>My benefits</p><span>Loans & staff offers</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <div class="spacer"></div>
+      </div>
+<div class="bnav">
+        <div class="nav-i" onclick="navTo('s-home')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Home</span></div>
+        <div class="nav-i" onclick="navTo('s-calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Calendar</span></div>
+        <div class="nav-i" onclick="navTo('s-channels')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Channels</span></div>
+        <div class="nav-i on" onclick="navTo('s-profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span><div class="nav-dot"></div></div>
+      </div>
+    </div>
+
+    <!-- BOOK -->
+    <div class="screen" id="s-book">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Find & book</div><div style="width:32px;"></div></div>
+      <div class="chip-row"><div class="chip hi">Desks</div><div class="chip">Meeting rooms</div><div class="chip">Parking</div><div class="chip">Hot seats</div></div>
+      <div class="slabel">Available desks — Level 4</div>
+      <div class="card" style="margin:0 20px;">
+        <div class="row" onclick="toast('Desk 4A-12 booked for today!')"><div class="row-ico" style="background:#003D32;border-radius:9px;">🪑</div><div class="row-info"><p>Desk 4A-12</p><span>Window seat · Near kitchen</span></div><div style="background:#003D32;color:#00C5A0;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;cursor:pointer;">Book</div></div>
+        <div class="row" onclick="toast('Desk 4B-07 booked for today!')"><div class="row-ico" style="background:#003D32;border-radius:9px;">🪑</div><div class="row-info"><p>Desk 4B-07</p><span>Quiet zone · Standing option</span></div><div style="background:#003D32;color:#00C5A0;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;cursor:pointer;">Book</div></div>
+        <div class="row"><div class="row-ico" style="background:#1A2F4A;border-radius:9px;">🪑</div><div class="row-info"><p>Desk 4C-02</p><span>Booked by D. Mthembu</span></div><div style="background:#1A2F4A;color:#5A7A99;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;">Taken</div></div>
+      </div>
+      <div class="slabel" style="margin-top:14px;">Meeting rooms</div>
+      <div class="card" style="margin:0 20px;">
+        <div class="row" onclick="go('s-bookroom')"><div class="row-ico" style="background:#0A2D52;border-radius:9px;">🏛️</div><div class="row-info"><p>Studio A</p><span>12 pax · AV · Whiteboard</span></div><div style="background:#003D32;color:#00C5A0;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;cursor:pointer;">Free</div></div>
+        <div class="row" onclick="go('s-bookroom')"><div class="row-ico" style="background:#0A2D52;border-radius:9px;">🚪</div><div class="row-info"><p>Room 4B</p><span>6 pax · Teams screen</span></div><div style="background:#3D2A00;color:#F5B942;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;cursor:pointer;">14:00+</div></div>
+      </div>
+    </div>
+
+    <!-- BOOK ROOM FORM -->
+    <div class="screen" id="s-bookroom">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Book Studio A</div><div style="width:32px;"></div></div>
+      <div class="detail-hero"><div class="detail-hero-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7FC4F8" stroke-width="1.6"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 21v-3M16 21v-3M2 12h20"/></svg></div><div><div class="detail-hero-title">Studio A</div><div class="detail-hero-sub">12 pax · Level 4 · AV + Whiteboard</div></div></div>
+      <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" value="2025-04-09"/></div>
+      <div class="form-group"><label class="form-label">Start time</label><select class="form-select"><option>09:00</option><option>10:00</option><option selected>11:00</option><option>12:00</option><option>13:00</option><option>14:00</option></select></div>
+      <div class="form-group"><label class="form-label">Duration</label><select class="form-select"><option>30 minutes</option><option selected>1 hour</option><option>2 hours</option><option>Half day</option></select></div>
+      <div class="form-group"><label class="form-label">Meeting title</label><input class="form-input" type="text" placeholder="e.g. Sprint demo"/></div>
+      <button class="btn-primary" onclick="toast('Studio A booked for 11:00!')">Confirm booking</button>
+    </div>
+
+    <!-- LEAVE -->
+    <div class="screen" id="s-leave">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Leave & time off</div><div style="width:32px;"></div></div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-val">12</div><div class="stat-lbl">Annual</div></div>
+        <div class="stat"><div class="stat-val">3</div><div class="stat-lbl">Sick days</div></div>
+        <div class="stat"><div class="stat-val">1</div><div class="stat-lbl">Family</div></div>
+      </div>
+      <div class="form-group"><label class="form-label">Leave type</label><select class="form-select"><option>Annual leave</option><option>Sick leave</option><option>Family responsibility</option><option>Study leave</option></select></div>
+      <div class="form-group"><label class="form-label">From date</label><input class="form-input" type="date" value="2025-04-14"/></div>
+      <div class="form-group"><label class="form-label">To date</label><input class="form-input" type="date" value="2025-04-16"/></div>
+      <div class="form-group"><label class="form-label">Notes (optional)</label><textarea class="form-input" rows="2" placeholder="Reason for leave…" style="resize:none;"></textarea></div>
+      <button class="btn-primary" onclick="toast('Leave request submitted!')">Submit request</button>
+      <div class="slabel">Recent requests</div>
+      <div class="card" style="margin:0 20px;">
+        <div class="row"><div class="row-ico" style="background:#003D32;border-radius:9px;font-size:14px;">✅</div><div class="row-info"><p>Annual leave</p><span>20–24 Jan · 5 days</span></div><div style="font-size:10px;color:#00C5A0;font-weight:600;">Approved</div></div>
+        <div class="row"><div class="row-ico" style="background:#3D2A00;border-radius:9px;font-size:14px;">⏳</div><div class="row-info"><p>Annual leave</p><span>14–16 Apr · 3 days</span></div><div style="font-size:10px;color:#F5B942;font-weight:600;">Pending</div></div>
+      </div>
+      <div class="spacer"></div>
+    </div>
+
+    <!-- TICKET -->
+    <div class="screen" id="s-ticket">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">IT services</div><div style="width:32px;"></div></div>
+      <div class="slabel">My open tickets</div>
+      <div class="card" style="margin:0 20px 14px;">
+        <div class="row" onclick="toast('Viewing ticket #1042…')"><div class="row-ico" style="background:#3D2A00;border-radius:9px;font-size:14px;">🖥️</div><div class="row-info"><p>#1042 — Monitor flickering</p><span>Logged 7 Apr · In progress</span></div><div style="font-size:10px;color:#F5B942;font-weight:600;">In prog.</div></div>
+        <div class="row" onclick="toast('Viewing ticket #1039…')"><div class="row-ico" style="background:#1B4D8A;border-radius:9px;font-size:14px;">🔐</div><div class="row-info"><p>#1039 — VPN access</p><span>Logged 3 Apr · Waiting info</span></div><div style="font-size:10px;color:#7FC4F8;font-weight:600;">Waiting</div></div>
+      </div>
+      <div class="slabel">Log a new ticket</div>
+      <div class="form-group"><label class="form-label">Category</label><select class="form-select"><option>Hardware</option><option>Software</option><option>Network / VPN</option><option>Access & permissions</option><option>Other</option></select></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="3" placeholder="Describe the issue…" style="resize:none;"></textarea></div>
+      <div class="form-group"><label class="form-label">Priority</label><select class="form-select"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+      <button class="btn-primary" onclick="toast('Ticket logged! Ref #1043')">Log ticket</button>
+    </div>
+
+    <!-- LOANS -->
+    <div class="screen" id="s-loans">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Staff benefits & loans</div><div style="width:32px;"></div></div>
+      <div class="card" style="margin:0 20px 14px;">
+        <div class="row" onclick="toast('Opening study loan info…')"><div class="row-ico" style="background:#2A1550;border-radius:9px;">🎓</div><div class="row-info"><p>Study loan</p><span>Up to R50,000 · 0% interest</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div class="row" onclick="toast('Opening computer loan info…')"><div class="row-ico" style="background:#003D32;border-radius:9px;">💻</div><div class="row-info"><p>Computer loan</p><span>Up to R15,000 · 12 months</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div class="row" onclick="toast('Opening gym benefit info…')"><div class="row-ico" style="background:#3D1A10;border-radius:9px;">🏋️</div><div class="row-info"><p>Gym subsidy</p><span>R800/month towards Virgin Active</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div class="row" onclick="toast('Opening medical aid info…')"><div class="row-ico" style="background:#0A2D52;border-radius:9px;">💊</div><div class="row-info"><p>Medical aid top-up</p><span>Discovery Health · Company match</span></div><svg class="row-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+    </div>
+
+    <!-- FLOOR PLAN -->
+    <div class="screen" id="s-floor">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Floor plan — Level 4</div><div style="width:32px;"></div></div>
+      <div class="chip-row"><div class="chip hi">Level 4</div><div class="chip">Level 3</div><div class="chip">Level 5</div><div class="chip">Level G</div></div>
+      <div class="floor-svg-wrap">
+        <svg viewBox="0 0 335 260" width="335" height="260" xmlns="http://www.w3.org/2000/svg">
+          <rect width="335" height="260" fill="#0D1B2E"/>
+          <rect x="10" y="10" width="315" height="240" rx="6" fill="#162540" stroke="#1E3A5A" stroke-width="1"/>
+          <rect x="20" y="20" width="90" height="70" rx="4" fill="#003D32" stroke="#00C5A0" stroke-width="1"/>
+          <text x="65" y="57" text-anchor="middle" font-size="9" fill="#00C5A0" font-family="sans-serif">Block A</text>
+          <text x="65" y="69" text-anchor="middle" font-size="8" fill="#00C5A0" opacity=".7">14 free</text>
+          <rect x="122" y="20" width="90" height="70" rx="4" fill="#0A2D52" stroke="#1E5A8A" stroke-width="1"/>
+          <text x="167" y="57" text-anchor="middle" font-size="9" fill="#7FC4F8" font-family="sans-serif">Block B</text>
+          <text x="167" y="69" text-anchor="middle" font-size="8" fill="#7FC4F8" opacity=".7">You are here</text>
+          <circle cx="167" cy="45" r="5" fill="#00C5A0"/>
+          <rect x="224" y="20" width="90" height="70" rx="4" fill="#162540" stroke="#1E3A5A" stroke-width="1"/>
+          <text x="269" y="57" text-anchor="middle" font-size="9" fill="#5A7A99" font-family="sans-serif">Block C</text>
+          <text x="269" y="69" text-anchor="middle" font-size="8" fill="#5A7A99" opacity=".7">All booked</text>
+          <rect x="20" y="110" width="140" height="55" rx="4" fill="#162540" stroke="#1E3A5A" stroke-width="1"/>
+          <text x="90" y="140" text-anchor="middle" font-size="9" fill="#A0BCCC" font-family="sans-serif">Meeting rooms</text>
+          <rect x="30" y="120" width="35" height="22" rx="3" fill="#003D32" stroke="#00C5A0" stroke-width=".8"/>
+          <text x="47" y="133" text-anchor="middle" font-size="7.5" fill="#00C5A0" font-family="sans-serif">Studio A</text>
+          <rect x="73" y="120" width="35" height="22" rx="3" fill="#3D2A00" stroke="#F5B942" stroke-width=".8"/>
+          <text x="90" y="133" text-anchor="middle" font-size="7.5" fill="#F5B942" font-family="sans-serif">Room 4B</text>
+          <rect x="115" y="120" width="35" height="22" rx="3" fill="#162540" stroke="#1E3A5A" stroke-width=".8"/>
+          <text x="132" y="133" text-anchor="middle" font-size="7.5" fill="#5A7A99" font-family="sans-serif">Room 4C</text>
+          <rect x="172" y="110" width="70" height="55" rx="4" fill="#162540" stroke="#1E3A5A" stroke-width="1"/>
+          <text x="207" y="150" text-anchor="middle" font-size="18" font-family="sans-serif">☕</text>
+          <rect x="254" y="110" width="60" height="55" rx="4" fill="#162540" stroke="#1E3A5A" stroke-width="1"/>
+          <text x="284" y="150" text-anchor="middle" font-size="18" font-family="sans-serif">🛗</text>
+          <rect x="20" y="180" width="294" height="60" rx="4" fill="#162540" stroke="#1E3A5A" stroke-width="1"/>
+          <text x="167" y="205" text-anchor="middle" font-size="9" fill="#5A7A99" font-family="sans-serif">Collaboration lounge</text>
+          <circle cx="50" cy="218" r="4" fill="#00C5A0" opacity=".8"/>
+          <circle cx="70" cy="215" r="4" fill="#00C5A0" opacity=".8"/>
+          <circle cx="90" cy="220" r="4" fill="#7FC4F8" opacity=".8"/>
+          <text x="30" y="250" font-size="8" fill="#3A5A75" font-family="sans-serif">● You  ● Available  ● Booked</text>
+        </svg>
+      </div>
+      <div class="card" style="margin:0 20px;">
+        <div class="row" onclick="toast('Studio A booked!')"><div class="row-ico" style="background:#003D32;border-radius:9px;font-size:14px;">🟢</div><div class="row-info"><p>Studio A</p><span>12 pax · Free now</span></div><div style="font-size:10px;color:#00C5A0;font-weight:600;cursor:pointer;">Book</div></div>
+        <div class="row"><div class="row-ico" style="background:#3D2A00;border-radius:9px;font-size:14px;">🟡</div><div class="row-info"><p>Room 4B</p><span>6 pax · Free after 14:00</span></div><div style="font-size:10px;color:#F5B942;font-weight:600;">14:00+</div></div>
+      </div>
+      <div class="spacer"></div>
+    </div>
+
+    <!-- EVENTS -->
+    <div class="screen" id="s-events">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Upcoming events</div><div style="width:32px;"></div></div>
+      <div class="card" style="margin:0 20px;">
+        <div class="row" onclick="toast('RSVP confirmed for Town Hall!')"><div class="ev-date"><div class="d">11</div><div class="m">Apr</div></div><div class="row-info"><p>Town Hall Q2</p><span>10:00 AM · Auditorium</span></div><div style="font-size:10px;color:#00C5A0;font-weight:600;cursor:pointer;">RSVP</div></div>
+        <div class="row" onclick="toast('Added to calendar!')"><div class="ev-date"><div class="d">14</div><div class="m">Apr</div></div><div class="row-info"><p>New joiner onboarding</p><span>09:00 AM · Room 4B</span></div><div style="font-size:10px;color:#7FC4F8;font-weight:600;cursor:pointer;">Add</div></div>
+        <div class="row" onclick="toast('RSVP confirmed!')"><div class="ev-date"><div class="d">17</div><div class="m">Apr</div></div><div class="row-info"><p>Safety & wellbeing day</p><span>All day · Multiple venues</span></div><div style="font-size:10px;color:#00C5A0;font-weight:600;cursor:pointer;">RSVP</div></div>
+        <div class="row" onclick="toast('RSVP confirmed for braai!')"><div class="ev-date"><div class="d">18</div><div class="m">Apr</div></div><div class="row-info"><p>Rooftop braai 🔥</p><span>17:00 · Rooftop terrace</span></div><div style="font-size:10px;color:#F5B942;font-weight:600;cursor:pointer;">RSVP</div></div>
+      </div>
+      <div class="spacer"></div>
+    </div>
+
+    <!-- APPT -->
+    <div class="screen" id="s-appt">
+      <div class="topbar"><div class="back-btn" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="screen-title">Make appointment</div><div style="width:32px;"></div></div>
+      <div class="form-group"><label class="form-label">With</label><input class="form-input" type="text" placeholder="Search colleague name…"/></div>
+      <div class="form-group"><label class="form-label">Subject</label><input class="form-input" type="text" placeholder="Meeting subject"/></div>
+      <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" value="2025-04-10"/></div>
+      <div class="form-group"><label class="form-label">Time</label><select class="form-select"><option>09:00</option><option>09:30</option><option selected>10:00</option><option>10:30</option><option>11:00</option><option>14:00</option><option>15:00</option></select></div>
+      <div class="form-group"><label class="form-label">Location</label><select class="form-select"><option>Teams (online)</option><option>Room 4B</option><option>Studio A</option><option>Their office</option></select></div>
+      <button class="btn-primary" onclick="toast('Appointment sent!')">Send invite</button>
+      <button class="btn-secondary" onclick="back()">Cancel</button>
+    </div>
+
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <!-- Copilot Agent Side Tab -->
+  <div class="agent-tab" id="agentFab">
+    <svg class="agent-tab-arrow" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    <div class="agent-tab-label">Copilot AI</div>
+    <div class="agent-tab-dot"></div>
+  </div>
+
+  <!-- Copilot Agent Panel -->
+  <div class="agent-panel" id="agentPanel">
+    <div class="agent-header">
+      <div class="agent-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M12 2a7 7 0 017 7c0 2.5-1.3 4.7-3.3 6L15 21H9l-.3-6A7 7 0 0112 2z"/><circle cx="9" cy="10" r="1" fill="white" stroke="none"/><circle cx="15" cy="10" r="1" fill="white" stroke="none"/></svg>
+      </div>
+      <div class="agent-title">
+        <p>Copilot Agent</p>
+        <span>&#9679; Online &middot; Powered by your AI agent</span>
+      </div>
+      <div class="agent-close" onclick="closeAgent()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#A0BCCC" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <div class="agent-messages" id="agentMessages">
+      <div class="agent-msg bot">
+        <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00C5A0,#1B8AFF);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="13" height="13"><path d="M12 2a7 7 0 017 7c0 2.5-1.3 4.7-3.3 6L15 21H9l-.3-6A7 7 0 0112 2z"/></svg>
+        </div>
+        <div class="agent-bubble">
+          Hey Aakaash &#128075; I am your Copilot Agent. I can help you book rooms, find colleagues, apply for leave and much more. What do you need?
+          <div class="action-chips">
+            <span class="action-chip" onclick="agentQuick(&#39;Book me a desk for today&#39;)">&#128197; Book desk</span>
+            <span class="action-chip" onclick="agentQuick(&#39;Apply for leave&#39;)">&#127958; Apply leave</span>
+            <span class="action-chip" onclick="agentQuick(&#39;Log an IT ticket&#39;)">&#127915; Log ticket</span>
+            <span class="action-chip" onclick="agentQuick(&#39;Find a colleague&#39;)">&#128100; Find someone</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="agent-suggestions" id="agentSugs">
+      <div class="sug-chip" onclick="agentQuick(&#39;What meetings do I have today?&#39;)">My meetings today</div>
+      <div class="sug-chip" onclick="agentQuick(&#39;How many leave days do I have left?&#39;)">Leave balance</div>
+      <div class="sug-chip" onclick="agentQuick(&#39;Is Studio A free now?&#39;)">Room availability</div>
+      <div class="sug-chip" onclick="agentQuick(&#39;Show me the food menu&#39;)">Food today</div>
+    </div>
+
+    <div class="agent-input-row">
+      <input class="agent-input" id="agentInput" placeholder="Ask me anything..." onkeydown="if(event.key===&#39;Enter&#39;)agentSend()"/>
+      <button class="agent-send" onclick="agentSend()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script>
+var navStack=[];
+function go(id){var cur=document.querySelector('.screen.active');if(cur)navStack.push(cur.id);showScreen(id);}
+function navTo(id){navStack=[];showScreen(id);}
+function back(){if(navStack.length){showScreen(navStack.pop());}}
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});var t=document.getElementById(id);if(t){t.classList.add('active');t.scrollTop=0;var sc=t.querySelector('.screen-scroll');if(sc)sc.scrollTop=0;}}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+// ── Agent tab drag + open ──
+(function(){
+  var tab=document.getElementById('agentFab');
+  var phone=tab.parentElement;
+  var dragging=false;
+  var dragMoved=false;
+  var startY=0;
+  var startTop=0;
+
+  // Set initial position
+  var phoneH=812;
+  tab.style.top=(phoneH/2)+'px';
+  tab.style.transform='translateY(-50%)';
+
+  function getTopFromEvent(e){
+    return e.touches ? e.touches[0].clientY : e.clientY;
+  }
+
+  tab.addEventListener('mousedown',startDrag);
+  tab.addEventListener('touchstart',startDrag,{passive:true});
+
+  function startDrag(e){
+    dragging=true;
+    dragMoved=false;
+    startY=getTopFromEvent(e);
+    var rect=tab.getBoundingClientRect();
+    var phoneRect=phone.getBoundingClientRect();
+    startTop=rect.top - phoneRect.top + tab.offsetHeight/2;
+    tab.style.transition='none';
+    tab.style.transform='none';
+    document.addEventListener('mousemove',onDrag);
+    document.addEventListener('touchmove',onDrag,{passive:false});
+    document.addEventListener('mouseup',endDrag);
+    document.addEventListener('touchend',endDrag);
+  }
+
+  function onDrag(e){
+    if(!dragging)return;
+    if(e.cancelable)e.preventDefault();
+    var clientY=getTopFromEvent(e);
+    var delta=clientY-startY;
+    if(Math.abs(delta)>4)dragMoved=true;
+    var newTop=startTop+delta;
+    var minTop=40;
+    var maxTop=phone.offsetHeight-80;
+    newTop=Math.max(minTop,Math.min(maxTop,newTop));
+    tab.style.top=newTop+'px';
+  }
+
+  function endDrag(e){
+    dragging=false;
+    tab.style.transition='background .2s,width .2s';
+    document.removeEventListener('mousemove',onDrag);
+    document.removeEventListener('touchmove',onDrag);
+    document.removeEventListener('mouseup',endDrag);
+    document.removeEventListener('touchend',endDrag);
+    if(!dragMoved){openAgent();}
+  }
+})();
+
+function openAgent(){
+  document.getElementById('agentPanel').classList.add('open');
+  document.getElementById('agentFab').style.display='none';
+  setTimeout(function(){var m=document.getElementById('agentMessages');m.scrollTop=m.scrollHeight;},350);
+}
+function closeAgent(){
+  document.getElementById('agentPanel').classList.remove('open');
+  document.getElementById('agentFab').style.display='flex';
+}
+var agentResponses={
+  'book me a desk for today':{text:'Sure! Desk 4A-12 (window seat) and 4B-07 (quiet zone) are both free on Level 4. Want me to book 4A-12 for you?',chips:['Yes, book 4A-12','Show more options']},
+  'apply for leave':{text:'Of course! What type of leave do you need?',chips:['Annual leave','Sick leave','Study leave']},
+  'log an it ticket':{text:'I can log that for you. What is the issue?',chips:['Hardware problem','Software issue','Network / VPN','Access request']},
+  'find a colleague':{text:'Who are you looking for? Search by name or department.',chips:['HR team','IT team','Finance team']},
+  'what meetings do i have today':{text:'You have 3 meetings today: 09:00 Stand-up sync (Room 4B), 11:00 1:1 with Jacques, and 14:00 Sprint planning (Studio A).',chips:['Get directions to room','Add to calendar']},
+  'how many leave days do i have left':{text:'You have: Annual leave 12 days, Sick leave 3 days, Family responsibility 1 day. Would you like to apply?',chips:['Apply for leave','View leave history']},
+  'is studio a free now':{text:'Yes! Studio A (12 pax) is free right now and available until 14:00. Shall I book it for you?',chips:['Book Studio A','Book for later today']},
+  'show me the food menu':{text:'Today at the food court: Bunny chow special R65, Build-your-own salad R55, Barista coffee R38, Burger of the week R85.',chips:['Get directions to Level 1']},
+  'yes, book 4a-12':{text:'Done! Desk 4A-12 is booked for you today. Added to your calendar.',chips:null},
+  'book studio a':{text:'Done! Studio A is booked for you now until 14:00. Enjoy the space!',chips:null},
+  'annual leave':{text:'Sure. How many days and when would you like to start? I can pre-fill the leave form for you.',chips:['Open leave form']},
+  'open leave form':{text:'Opening the leave form now!',chips:null,action:'s-leave'},
+  'get directions to level 1':{text:'The food court is on Level 1. Take the lift near Block C or the stairs at the east end.',chips:null},
+  'get directions to room':{text:'Studio A is on Level 4, Block A. Turn left out of the lift and it is the first door on the right.',chips:null}
+};
+function agentQuick(text){document.getElementById('agentInput').value=text;agentSend();}
+function agentSend(){
+  var input=document.getElementById('agentInput');
+  var text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  addAgentMsg(text,'user',null);
+  var msgs=document.getElementById('agentMessages');
+  var typing=document.createElement('div');
+  typing.className='agent-msg bot';
+  typing.id='agentTyping';
+  typing.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00C5A0,#1B8AFF);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="13" height="13"><path d="M12 2a7 7 0 017 7c0 2.5-1.3 4.7-3.3 6L15 21H9l-.3-6A7 7 0 0112 2z"/></svg></div><div class="agent-typing"><span></span><span></span><span></span></div>';
+  msgs.appendChild(typing);
+  msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(function(){
+    var t=document.getElementById('agentTyping');
+    if(t)t.remove();
+    var key=text.toLowerCase().replace(/[?!.,]/g,'');
+    var resp=agentResponses[key];
+    if(resp){
+      addAgentMsg(resp.text,'bot',resp.chips);
+      if(resp.action){setTimeout(function(){go(resp.action);},600);}
+    } else {
+      addAgentMsg('I can help with that! In the live app this connects to your AI agent backend.','bot',['Book a resource','Check my schedule','Apply for leave']);
+    }
+  },1100);
+}
+function addAgentMsg(text,role,chips){
+  var msgs=document.getElementById('agentMessages');
+  var div=document.createElement('div');
+  div.className='agent-msg '+role;
+  var av='';
+  if(role==='bot'){
+    av='<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00C5A0,#1B8AFF);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="13" height="13"><path d="M12 2a7 7 0 017 7c0 2.5-1.3 4.7-3.3 6L15 21H9l-.3-6A7 7 0 0112 2z"/></svg></div>';
+  } else {
+    av='<div style="width:26px;height:26px;border-radius:50%;background:#1B4D8A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#7FC4F8;flex-shrink:0;">AK</div>';
+  }
+  var chipsHtml='';
+  if(chips&&chips.length){
+    chipsHtml='<div class="action-chips">';
+    for(var i=0;i<chips.length;i++){
+      chipsHtml+='<span class="action-chip" onclick="agentQuick(this.textContent)">'+chips[i]+'</span>';
+    }
+    chipsHtml+='</div>';
+  }
+  div.innerHTML=av+'<div class="agent-bubble">'+text+chipsHtml+'</div>';
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+</script>
+</body>
+</html>
