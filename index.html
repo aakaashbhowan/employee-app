@@ -640,10 +640,10 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 
 function openLeave(){
   var fallback='microsoft-edge-https://performancemanager.successfactors.eu/sf/timeoff?_s.crb=NxDr4jwQFfl9gpKeNnEg6z693zKE198%2bT1fjTwi9Amw%3d';
-  var appScheme='com.sap.successfactors://timeoff';
+  //var appScheme='com.sap.successfactors://timeoff';
   var start=Date.now();
   // Try to open the native app
-  window.location.href=appScheme;
+  //window.location.href=appScheme;
   // If the app doesn't open within 1.5s, iOS stays on page — fall back to Edge
   setTimeout(function(){
     if(Date.now()-start<2000){
