@@ -644,12 +644,13 @@ function openLeave(){
   var start=Date.now();
   // Try to open the native app
   //window.location.href=appScheme;
+  window.location.href=fallback;
   // If the app doesn't open within 1.5s, iOS stays on page — fall back to Edge
-  setTimeout(function(){
-    if(Date.now()-start<2000){
-      window.location.href=fallback;
-    }
-  },1500);
+  //setTimeout(function(){
+  //  if(Date.now()-start<2000){
+      //window.location.href=fallback;
+  //  }
+  //},1500);
 }
 function openLeaveAgent(){agentQuick('Apply for leave');}
 function openAgent(){
